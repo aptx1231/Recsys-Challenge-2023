@@ -1,95 +1,65 @@
-这项挑战是由ShareChat公司为您带来的。ShareChat是印度最大的本土社交媒体公司，在其所有平台上拥有4亿多的MAU。ShareChat的总部设在班加罗尔，其团队正在印度、美国和欧洲等地进行全球扩张。我们拥有一流的人工智能和ML技术以及最强大的饲料排名系统，为我们的增长提供动力。我们的目标是到2025年，在ShareChat和Moj创造一百万个可盈利的创作者，创作者的收入达到4.5亿美元。
+# Solutions for [RecSys Challenge 2023](http://recsyschallenge.com/2023)
+## Team Info
 
+Team name: BUAA_BIGSCity
 
+Team member: Jiawei Jiang
 
-RecSys 2023挑战赛将由Sarang Brahme、Rahul Agarwal（ShareChat）、Abhishek Srivastava（印度维萨卡帕特南IIM）、Liu Yong（新加坡华为）和Athirai Irissappane（美国亚马逊）根据ShareChat提供的数据组织。今年的挑战将集中在在线广告、改进深度漏斗优化和用户隐私方面。
-ShareChat为您带来了挑战。ShareChat是印度最大的本土社交媒体公司，在其所有平台上拥有4亿多MAU。ShareChat总部位于班加罗尔，正在将其团队扩展到印度、美国和欧洲的全球各地。我们拥有一流的AI和ML技术以及最强的饲料排名系统，为我们的发展提供动力。我们的目标是到2025年，通过ShareChat和Moj创造100万个可盈利的创作者，创作者收入为4.5亿美元。
+Team adviser: Jingyuan Wang
 
+Rank: 6th in the academic track
 
+## Train & Test
 
-![image-20230417000259247](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20230417000259247.png)
+You can reproduce the results by following these steps:
 
+**Step 1**: Download the [dataset](https://sharechat.com/recsys2023/dashboard) and place it in the ``./data/`` directory to get the following directory structure:
 
+```shell
+./data/test/*.csv
+./data/train/*.csv
+```
 
+**Step 2**: Environment Configuration:
 
+```shell
+conda create -n recsys python=3.9.7
+pip install torch==1.10.1+cu111 torchvision==0.11.2+cu111 torchaudio==0.10.1 -f https://download.pytorch.org/whl/cu111/torch_stable.html
+pip install -r requirements.txt
+```
 
-自2000年初以来，在线广告已经成为一个价值数十亿美元的行业，在互联网的发展中发挥了重要作用。在线广告过度传统的大规模广告的主要优势是其固有的个性化用户、民主化广告和使各种规模的企业都能参与的能力，以及为广告商提供可衡量的资金支出影响。在过去的二十年里，在线广告的性质也发生了巨大的变化，从纯粹的基于横幅的广告，广告商根据广告印象的数量收费，到深度漏斗优化，广告商对最终的销售进行优化。
-深度漏斗优化的功效需要广泛的个性化，并在实时拍卖设计、大规模机器学习、建模延迟反馈和行为理解方面带来了丰富的问题。随着这些系统的成熟，我们也开始对保护用户隐私、确保Al公平和防止平台被恶意利用的必要性有了深刻的理解。
-在这一挑战中，我们的目标是从Sharechat和Moj应用程序中提供一个真实世界的广告数据集，作为研究深度漏斗优化的基准，重点关注用户隐私
+**Step 3**: Fuse the training data set:
 
+```shell
+python merge_data.py
+```
 
+This command will generate the file ``./data/train.csv`.
 
-该数据集对应于大约1000万随机用户，他们在三个月内访问了ShareChat+Moj应用程序。我们对每个用户的活动进行了抽样，以生成与每个用户相对应的10个印象。我们的目标变量是用户是否安装了应用程序。
-为了表示用户，提供了几个功能：
-人口统计特征：包括年龄、性别和用户访问Sharechat/Moj应用程序的地理位置。对（1）中的用户进行抽样，使我们在人口统计特征中的用户分布大致均匀。用户的位置被散列到32位以匿名化数据。
-内容偏好嵌入：这些嵌入是根据用户对Sharechat/Moj应用程序上各种非广告内容的消费情况进行训练的。
-应用程序亲和嵌入：这些嵌入是基于用户在我们平台上安装的过去的应用程序进行训练的。
-我们还有与广告相对应的功能
-广告分类特征：这些特征代表广告的不同特征，包括广告的大小、广告的类别等。这些特征被散列到32位以匿名化数据
-广告嵌入：这些表示广告的实际视频/图像内容。
-为了捕捉用户和广告之间的历史互动，我们还提供
-计数功能：这些功能表示用户在不同时间窗口长度内与广告、广告商和广告商类别的交互
-每一行数据都有一个相关的数字id，代表向用户显示的广告印象，以及它是否导致点击广告并随后安装。
-我们不提供单个特征的语义。
-培训数据由过去2周的二次抽样印象/点击/安装组成，旨在预测第15天的安装概率。
+**Step 4**: Run command to train three models:
 
+```shell
+python trainDeep.py --model xDeepFM --dense_bins 5 --sparse_dim 4 --batch_size 256 --epoch 50 --patience 10 --device 2 --exp_id 96499
+python trainDeep.py --model xDeepFM --dense_bins 10 --sparse_dim 4 --batch_size 256 --epoch 50 --patience 10 --device 1 --exp_id 3957
+python trainDeep.py --model xDeepFM --dense_bins 5 --sparse_dim 4 --batch_size 256 --epoch 50 --patience 10 --device 1 --dropout 0.2 --exp_id 1984
+```
 
+Each command generates one model, where the exp_id in the command represents the ID record of one training. 
 
-内容：
+Correspondingly, the trained models are stored in `./ckpt/exp_id_*.ckpt`, and the model prediction results are stored in `./output/exp_id_*.csv`, and the logs of the training process are stored in `./log/exp_id_*.log`.
 
-Sharechat Recsys挑战的目的是预测用户是否会为给定的广告印象安装或不安装。预测用于生成衡量平台预期收入的排名，然后将获胜者的广告显示给用户。由于预测是在实际rankinq中使用的，因此准确估计概率是很重要的
+**Step 5**: Merge the output of 3 models. [This step can be skipped because the predicted results are already included in the `./output` directory.]
 
-指标：
+ ```shell
+ python result_merge.py
+ ```
 
-为了评估任何模型的性能，我们将使用归一化的交叉熵，其定义如下：
+This command will fuse the output of the 3 models to get the file `avg_96499_3957_1984_1_1_2.csv`. This file has a final submission score of 6.282142, ranking 6th in the academic track.
 
-![image-20230417001308213](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20230417001308213.png)
+## Method Introduction
 
-![image-20230417001313219](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20230417001313219.png)
+The proposal will be presented in the paper submitted to the workshop.
 
+## Acknowledgements
 
-
-
-
-简介
-该档案包含2023年Sharechat RecSys挑战赛的数据集。该数据集由捕捉用户和广告特征（分类、二进制、数字）以及用户是否产生点击和/或安装的记录组成。需要注意的是，在网络广告的情况下，用户有可能在观看了广告后没有点击广告，而是直接安装了底层应用。这种行为的含义是，我们有没有点击但有安装的记录。
-
-为了生成训练和测试数据，我们考虑了连续22天的广告服务数据。前21天构成了训练数据的基础，第22天的数据被用来生成测试数据。从这个基础数据中，我们创建了印象记录，这意味着一个广告被一个用户浏览过。我们用两个字段来注释这个数据，即is_clicked和is_install，以表示是否有用户进行了点击和安装。我们可以用（is_clicked, is_installed）的值将整个数据集细分为四个不重叠的子集，如下：
-1.（0，0）对应于既没有点击也没有安装的印象。
-\2. (1, 0) 对应于有点击但没有安装的印象
-\3. (0, 1)对应的是用户没有点击但安装了该应用的印象
-\4. (1, 1) 对应于用户在点击后安装了应用的印象。
-
-为了保持数据集的可管理性，并保护点击率、转换（安装）率等机密信息，我们对上述四个子集对应的记录进行了不同程度的降样。
-
-任务
-挑战赛的任务是预测测试集中记录的is_clicked和is_installed。
-
-档案的内容
-档案包含两个文件夹和README文件（此文件）。train文件夹包含30个文件，代表训练数据；test文件夹包含1个文件，代表测试数据。这些文件是用标签分开的。
-
-训练数据：
-train文件夹下有多个文件。文件的每一行表示一条印象记录。每个文件有以下格式：
-
-\1. 第一行是标题行，包含名称f_0到f_79，后面是is_clicked，is_installed。
-\2. 2.每一行由不同的列组成，以制表符分隔。
-\3. 3. 不同列的数据类型是：
-   a. RowId(f_0)
-   b. 日期(f_1)
-   c. 分类特征(f_2到f_32)
-   d. 二元特征(f_33到f_41)
-   e. 数字特征(f_42到f_79)
-   f. 标签(is_clicked, is_installed)
-\4. 一些特征可能是空的，在与该记录相对应的制表符分隔的行中，用空字符串表示。
- 对应于该记录的空字符串
-
-测试数据：
-在测试文件夹中有一个文件。该文件的格式与训练文件夹中的文件相同，但其中的
-两列（is_clicked，is_installed）不存在。
-
-提交格式：
-提交文件的格式应该包含三个以制表符分隔的列，代表RowId，对应于测试数据中的行，以及对应的
-行，以及相应的预测值is_clicked，is_installed。
-
-
-[Translated with DeepL](https://www.deepl.com/translator?utm_source=windows&utm_medium=app&utm_campaign=windows-share)
+[DeepCTR-Torch](https://github.com/shenweichen/DeepCTR-Torch)
