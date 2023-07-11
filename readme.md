@@ -3,9 +3,9 @@
 
 Team name: BUAA_BIGSCity
 
-Team member: Jiawei Jiang
+Team member: Jiawei Jiang, Wang Bing.
 
-Team adviser: Jingyuan Wang
+Team adviser: Jingyuan Wang.
 
 Rank: 6th in the academic track
 
