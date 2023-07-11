@@ -3,7 +3,7 @@
 
 Team name: BUAA_BIGSCity
 
-Team member: Jiawei Jiang, Wang Bing.
+Team member: Jiawei Jiang, Bing Wang.
 
 Team adviser: Jingyuan Wang.
 
